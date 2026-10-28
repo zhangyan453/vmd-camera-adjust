@@ -459,6 +459,8 @@ class App:
             return
 
         self.vmd = vmd
+        # 先启用控件：ttk.Entry 处于 disabled 状态时会忽略程序写入
+        self._set_controls_state(True)
         self._populate_tree()
         fmin, fmax = min(vmd.frames), max(vmd.frames)
         self.entry_start.delete(0, 'end')
@@ -472,7 +474,6 @@ class App:
                                 vmd.camera_count, fmin, fmax),
                          foreground='#333')
         self.refresh()
-        self._set_controls_state(True)
 
     def save_file(self):
         if not self.vmd:
@@ -541,9 +542,9 @@ class App:
             self._set_entry_text(k, 0.0)
 
     def zero_slider(self, key):
+        """把该轴偏移归零（仍以本次会话的基准为准，不影响其它轴的偏移）。"""
         self.sliders[key].set(0.0)
         self._set_entry_text(key, 0.0)
-        self._snapshot = None
         self.on_slider(key)
 
     def _slider_val(self, key):
@@ -702,16 +703,25 @@ class App:
                 c.create_rectangle(x0, top + 2, max(x1, x0 + 2), bottom,
                                    fill='#f0f7ff', outline='')
                 # 由于矩形在底层，重新画刻度文字
+            # 关键帧不足 2 个时画成圆点，避免 create_line 坐标数不足报错
+            def plot_line(points, **kw):
+                if len(points) >= 4:
+                    c.create_line(*points, **kw)
+                else:
+                    x, y = points
+                    c.create_oval(x - 2, y - 2, x + 2, y + 2,
+                                  fill=kw.get('fill'), outline='')
+
             # 原始曲线（虚线）
             pts = []
             for k in range(len(order)):
                 pts.extend(to_xy(k, o_vals[k]))
-            c.create_line(*pts, fill='#9aa5b1', dash=(4, 3), width=1)
+            plot_line(pts, fill='#9aa5b1', dash=(4, 3), width=1)
             # 调整后曲线（实线彩色）
             pts = []
             for k in range(len(order)):
                 pts.extend(to_xy(k, c_vals[k]))
-            c.create_line(*pts, fill=color, width=1.8)
+            plot_line(pts, fill=color, width=1.8)
 
             # 名称与数值范围
             c.create_text(6, top + 6, anchor='nw', text=name, fill=color,
