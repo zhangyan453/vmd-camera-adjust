@@ -45,6 +45,79 @@ POS_OFFSET = 8
 # 滑块范围与步长（步长 0.01，保留两位小数）
 SLIDER_MIN, SLIDER_MAX, SLIDER_STEP = -300.0, 300.0, 0.01
 
+# 内置窗口图标（64x64 PNG 的 base64），保证单文件也能显示自定义图标
+_ICON_PNG_B64 = (
+    "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"
+    "kHwVbZdqJ/8ArdBqZPrPLH0AAAAASUVORK5CYII="
+)
+
 
 # ---------------- 界面文字 / UI strings ----------------
 _STRINGS = {
@@ -650,6 +723,23 @@ class App:
                       text=t('plot_frames', fmin, fmax), fill='#888')
 
 
+def _apply_window_icon(root):
+    """设置窗口 / 任务栏图标：优先用同目录的 icon.ico，否则用内置 PNG。"""
+    ico = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'icon.ico')
+    try:
+        if os.name == 'nt' and os.path.exists(ico):
+            root.iconbitmap(ico)
+            return
+    except Exception:
+        pass
+    try:
+        img = tk.PhotoImage(data=_ICON_PNG_B64)
+        root.iconphoto(True, img)
+        root._icon_image = img  # 保持引用，防止图标被回收
+    except Exception:
+        pass
+
+
 def main():
     global _LANG
     argv = sys.argv[1:]
@@ -665,6 +755,7 @@ def main():
         root.call('tk', 'scaling', 1.2)
     except Exception:
         pass
+    _apply_window_icon(root)
     App(root)
     root.mainloop()
 

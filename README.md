@@ -1,3 +1,5 @@
+<p align="center"><img src="icon.png" width="96" alt="VMD Camera Adjuster"></p>
+
 # VMD Camera Adjuster / VMD 镜头微调工具
 
 **中文** | [English](#english)
